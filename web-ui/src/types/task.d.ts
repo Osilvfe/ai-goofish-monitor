@@ -23,6 +23,10 @@ export interface Task {
   decision_mode: 'ai' | 'keyword';
   keyword_rules: string[];
   is_running: boolean;
+  auto_order_enabled?: boolean;
+  auto_order_target_price?: string | null;
+  auto_order_action?: 'notify_only' | 'generate_link' | 'auto_buy';
+  seller_active_option?: string;
 }
 
 export type TaskGenerationStatus = 'queued' | 'running' | 'completed' | 'failed';
@@ -73,4 +77,8 @@ export interface TaskGenerateRequest {
   region?: string | null;
   decision_mode?: 'ai' | 'keyword';
   keyword_rules?: string[];
+  auto_order_enabled?: boolean;
+  auto_order_target_price?: string | null;
+  auto_order_action?: 'notify_only' | 'generate_link' | 'auto_buy';
+  seller_active_option?: string;
 }

@@ -62,6 +62,7 @@ from src.services.search_pagination import (
     is_search_results_response,
 )
 from src.services.auto_order_service import AutoOrderService
+from src.services.seller_active_service import is_seller_recently_active
 
 
 class RiskControlError(Exception):
@@ -441,6 +442,25 @@ async def scrape_user_profile(context, user_id: str) -> dict:
         print(f"   -> 用户 {user_id} 信息采集完成。")
 
     return profile_data
+
+
+def _passes_seller_active_filter(task_config: dict, last_active_time) -> bool:
+    """按任务配置的卖家活跃时间选项过滤商品。无活跃数据时放行。"""
+    option = (task_config.get("seller_active_option") or "__none__").strip()
+    if option in ("", "__none__"):
+        return True
+    if not last_active_time:
+        return True
+    hours_map = {
+        "1 小时内": 1,
+        "24 小时内": 24,
+        "3 天内": 72,
+        "7 天内": 168,
+    }
+    within_hours = hours_map.get(option)
+    if within_hours is None:
+        return True
+    return is_seller_recently_active(str(last_active_time), within_hours=within_hours)
 
 
 async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
@@ -1048,9 +1068,6 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                                 seller_online_status = await safe_get(
                                     seller_do, "onlineStatus"
                                 )
-                                seller_active_type = await safe_get(
-                                    seller_do, "activeType"
-                                )
 
                                 # 2. 提取该商品的完整图片列表
                                 image_infos = await safe_get(
@@ -1102,6 +1119,17 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                                 final_record["price_insight"] = price_reference.get(
                                     "本商品价格位置", {}
                                 )
+
+                                # 卖家活跃时间筛选（无活跃数据时放行，避免误杀）
+                                if not _passes_seller_active_filter(
+                                    task_config,
+                                    seller_last_active_time,
+                                ):
+                                    log_time(
+                                        f"商品 {item_data.get('商品标题', '未知')} 未通过卖家活跃时间筛选，跳过。"
+                                    )
+                                    processed_links.add(unique_key)
+                                    continue
 
                                 analysis_dispatcher.submit(
                                     ItemAnalysisJob(

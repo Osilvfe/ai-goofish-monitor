@@ -131,17 +131,17 @@ const zhCNExtra = {
           within7Days: '7 天内活跃',
         },
         hint: '筛选最近活跃的卖家，提高沟通效率',
-    sellerActiveFilter: {
-      label: '卖家活跃时间',
-      placeholder: '选择活跃时间',
-      options: {
-        none: '不限',
-        within1Hour: '1 小时内',
-        within24Hours: '24 小时内',
-        within3Days: '3 天内',
-        within7Days: '7 天内',
       },
-    },
+      sellerActiveFilter: {
+        label: '卖家活跃时间',
+        placeholder: '选择活跃时间',
+        options: {
+          none: '不限',
+          within1Hour: '1 小时内',
+          within24Hours: '24 小时内',
+          within3Days: '3 天内',
+          within7Days: '7 天内',
+        },
       },
       validation: {
         incomplete: '信息不完整',

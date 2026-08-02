@@ -113,6 +113,13 @@ watch(() => [props.mode, props.initialData, props.defaultValues, props.defaultAc
         defaultValues.new_publish_option || props.initialData.new_publish_option || '__none__',
       region: defaultValues.region || props.initialData.region || '',
       decision_mode: defaultValues.decision_mode || props.initialData.decision_mode || 'ai',
+      auto_order_enabled: defaultValues.auto_order_enabled ?? props.initialData.auto_order_enabled ?? false,
+      auto_order_target_price:
+        defaultValues.auto_order_target_price ?? props.initialData.auto_order_target_price ?? undefined,
+      auto_order_action:
+        defaultValues.auto_order_action ?? props.initialData.auto_order_action ?? 'notify_only',
+      seller_active_option:
+        defaultValues.seller_active_option || props.initialData.seller_active_option || '__none__',
     }
     keywordRulesInput.value = (defaultValues.keyword_rules || props.initialData.keyword_rules || []).join('\n')
     // 编辑模式下，根据 cron 值判断模式
@@ -138,6 +145,7 @@ watch(() => [props.mode, props.initialData, props.defaultValues, props.defaultAc
       auto_order_enabled: false,
       auto_order_target_price: undefined,
       auto_order_action: 'notify_only',
+      seller_active_option: '__none__',
       ...defaultValues,
     }
     if (!form.value.account_strategy) {
@@ -483,7 +491,6 @@ function handleSubmit() {
           </Select>
         </div>
       </div>
-      <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4">
       <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4 border-t pt-4 mt-2">
         <Label class="sm:text-right font-semibold">{{ t('tasks.form.sellerActive.title') }}</Label>
         <div class="sm:col-span-3">
@@ -504,6 +511,7 @@ function handleSubmit() {
           </p>
         </div>
       </div>
+      <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4">
         <Label class="sm:text-right">{{ t('tasks.form.region') }}</Label>
         <div class="space-y-1 sm:col-span-3">
           <TaskRegionSelector v-model="form.region as any" />

@@ -25,7 +25,7 @@ def demo_order_link_generation():
     
     # 示例商品数据
     item = {
-        "商品 ID": "686123456789",
+        "商品ID": "686123456789",
         "商品标题": "iPhone 15 Pro Max 256G 蓝色钛金属 99 新",
         "当前售价": "8999",
         "商品链接": "https://www.goofish.com/item/686123456789.htm"
@@ -33,14 +33,14 @@ def demo_order_link_generation():
     
     # 生成 PC 端链接
     pc_link = link_service.generate_order_link(
-        item_id=item["商品 ID"],
+        item_id=item["商品ID"],
         price=item["当前售价"],
         source="monitor"
     )
     
     # 生成移动端链接
     mobile_link = link_service.generate_mobile_order_link(
-        item_id=item["商品 ID"],
+        item_id=item["商品ID"],
         price=item["当前售价"]
     )
     
@@ -125,7 +125,7 @@ async def demo_auto_order_processing():
     
     # 示例商品数据
     item_data = {
-        "商品 ID": "686123456789",
+        "商品ID": "686123456789",
         "商品标题": "MacBook Pro 2023 M3 14 寸",
         "当前售价": "12999",
         "商品链接": "https://www.goofish.com/item/686123456789.htm",

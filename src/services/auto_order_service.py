@@ -81,6 +81,7 @@ class AutoOrderService:
         self,
         item_data: Dict,
         task_config: Dict,
+        seller_id: Optional[str] = None,
     ) -> Dict:
         """
         处理自动下单逻辑
@@ -88,6 +89,7 @@ class AutoOrderService:
         Args:
             item_data: 商品数据
             task_config: 任务配置
+            seller_id: 卖家 ID（可选）
             
         Returns:
             处理结果
@@ -132,8 +134,8 @@ class AutoOrderService:
             
         elif auto_order_action == "generate_link":
             # 生成订单链接
-            item_id = str(item_data.get("商品 ID", ""))
-            seller_id = str(item_data.get("卖家 ID", "")) if item_data.get("卖家 ID") else None
+            item_id = str(item_data.get("商品ID", ""))
+            seller_id = seller_id or item_data.get("卖家ID") or None
             
             result["order_link"] = self.order_link_service.generate_order_link(
                 item_id=item_id,
@@ -153,8 +155,8 @@ class AutoOrderService:
         elif auto_order_action == "auto_buy":
             # TODO: 实现自动购买逻辑（需要闲鱼 API 支持）
             # 目前生成链接并提示用户手动购买
-            item_id = str(item_data.get("商品 ID", ""))
-            seller_id = str(item_data.get("卖家 ID", "")) if item_data.get("卖家 ID") else None
+            item_id = str(item_data.get("商品ID", ""))
+            seller_id = seller_id or item_data.get("卖家ID") or None
             
             result["order_link"] = self.order_link_service.generate_order_link(
                 item_id=item_id,

@@ -20,6 +20,7 @@ def _row_to_task(row) -> Task:
     payload["personal_only"] = bool(payload["personal_only"])
     payload["free_shipping"] = bool(payload["free_shipping"])
     payload["is_running"] = bool(payload["is_running"])
+    payload["auto_order_enabled"] = bool(payload.get("auto_order_enabled", 0))
     payload["keyword_rules"] = json.loads(payload.pop("keyword_rules_json") or "[]")
     return Task(**payload)
 
@@ -92,13 +93,17 @@ class SqliteTaskRepository(TaskRepository):
                     max_pages, personal_only, min_price, max_price, cron,
                     ai_prompt_base_file, ai_prompt_criteria_file, account_state_file,
                     account_strategy, free_shipping, new_publish_option, region,
-                    decision_mode, keyword_rules_json, is_running
+                    decision_mode, keyword_rules_json, is_running,
+                    auto_order_enabled, auto_order_target_price, auto_order_action,
+                    seller_active_option
                 ) VALUES (
                     :id, :task_name, :enabled, :keyword, :description, :analyze_images,
                     :max_pages, :personal_only, :min_price, :max_price, :cron,
                     :ai_prompt_base_file, :ai_prompt_criteria_file, :account_state_file,
                     :account_strategy, :free_shipping, :new_publish_option, :region,
-                    :decision_mode, :keyword_rules_json, :is_running
+                    :decision_mode, :keyword_rules_json, :is_running,
+                    :auto_order_enabled, :auto_order_target_price, :auto_order_action,
+                    :seller_active_option
                 )
                 """,
                 payload,
@@ -127,6 +132,7 @@ class SqliteTaskRepository(TaskRepository):
         values["personal_only"] = int(task.personal_only)
         values["free_shipping"] = int(task.free_shipping)
         values["is_running"] = int(task.is_running)
+        values["auto_order_enabled"] = int(task.auto_order_enabled)
         values["keyword_rules_json"] = json.dumps(task.keyword_rules or [], ensure_ascii=False)
         values.pop("keyword_rules", None)
         return values

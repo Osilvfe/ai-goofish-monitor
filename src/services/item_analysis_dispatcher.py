@@ -94,6 +94,7 @@ class ItemAnalysisDispatcher:
             auto_order_result = await self._auto_order_service.process_auto_order(
                 item_data=item_data,
                 task_config=self._task_config,
+                seller_id=job.seller_id,
             )
         
         await self._notify_with_auto_order(item_data, record["ai_analysis"], auto_order_result)
@@ -181,7 +182,7 @@ class ItemAnalysisDispatcher:
         if not image_urls:
             return []
         return await self._image_downloader(
-            item_data["商品 ID"],
+            item_data.get("商品ID"),
             image_urls,
             job.task_name,
         )

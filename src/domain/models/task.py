@@ -133,6 +133,7 @@ class Task(BaseModel):
     auto_order_enabled: bool = False
     auto_order_target_price: Optional[str] = None
     auto_order_action: Literal["notify_only", "generate_link", "auto_buy"] = "notify_only"
+    seller_active_option: str = "__none__"
 
     @model_validator(mode="before")
     @classmethod
@@ -256,6 +257,7 @@ class TaskUpdate(BaseModel):
     auto_order_enabled: Optional[bool] = None
     auto_order_target_price: Optional[str] = None
     auto_order_action: Optional[Literal["notify_only", "generate_link", "auto_buy"]] = None
+    seller_active_option: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -322,6 +324,7 @@ class TaskGenerateRequest(BaseModel):
     auto_order_enabled: bool = False
     auto_order_target_price: Optional[str] = None
     auto_order_action: Literal["notify_only", "generate_link", "auto_buy"] = "notify_only"
+    seller_active_option: str = "__none__"
 
     @model_validator(mode="before")
     @classmethod

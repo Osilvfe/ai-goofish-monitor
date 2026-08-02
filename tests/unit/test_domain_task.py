@@ -51,6 +51,61 @@ def test_task_apply_update():
     assert updated.task_name == task.task_name
 
 
+def test_task_defaults_for_auto_order_and_seller_active():
+    task = Task(
+        id=1,
+        task_name="Sony A7M4",
+        enabled=True,
+        keyword="sony a7m4",
+        description="body",
+        max_pages=2,
+        personal_only=True,
+        min_price=None,
+        max_price=None,
+        cron=None,
+        ai_prompt_base_file="prompts/base_prompt.txt",
+        ai_prompt_criteria_file="prompts/sony_a7m4_criteria.txt",
+        is_running=False,
+    )
+
+    assert task.auto_order_enabled is False
+    assert task.auto_order_action == "notify_only"
+    assert task.auto_order_target_price is None
+    assert task.seller_active_option == "__none__"
+
+
+def test_task_accepts_auto_order_and_seller_active_fields():
+    task = Task(
+        id=1,
+        task_name="Sony A7M4",
+        enabled=True,
+        keyword="sony a7m4",
+        description="body",
+        max_pages=2,
+        personal_only=True,
+        min_price=None,
+        max_price=None,
+        cron=None,
+        ai_prompt_base_file="prompts/base_prompt.txt",
+        ai_prompt_criteria_file="prompts/sony_a7m4_criteria.txt",
+        is_running=False,
+        auto_order_enabled=True,
+        auto_order_target_price="5000",
+        auto_order_action="generate_link",
+        seller_active_option="24 小时内",
+    )
+
+    assert task.auto_order_enabled is True
+    assert task.auto_order_target_price == "5000"
+    assert task.auto_order_action == "generate_link"
+    assert task.seller_active_option == "24 小时内"
+
+    update = TaskUpdate(auto_order_enabled=False, seller_active_option="7 天内")
+    updated = task.apply_update(update)
+    assert updated.auto_order_enabled is False
+    assert updated.seller_active_option == "7 天内"
+
+
 def test_legacy_keyword_groups_are_flattened_to_keyword_rules():
     task = Task(
         id=1,

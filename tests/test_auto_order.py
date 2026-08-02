@@ -129,9 +129,11 @@ class TestAutoOrderService:
     
     def test_process_auto_order_notify_only(self):
         """测试仅通知模式"""
+        import asyncio
+
         service = AutoOrderService()
         item_data = {
-            "商品 ID": "123456789",
+            "商品ID": "123456789",
             "当前售价": "4500",
             "商品链接": "https://example.com/item/123456789"
         }
@@ -141,7 +143,7 @@ class TestAutoOrderService:
             "auto_order_target_price": "5000"
         }
         
-        result = service.process_auto_order(item_data, task_config)
+        result = asyncio.run(service.process_auto_order(item_data, task_config))
         
         assert result["should_notify"] is True
         assert result["order_link"] is None
@@ -151,7 +153,7 @@ class TestAutoOrderService:
         """测试生成链接模式"""
         service = AutoOrderService()
         item_data = {
-            "商品 ID": "123456789",
+            "商品ID": "123456789",
             "当前售价": "4500",
             "商品链接": "https://example.com/item/123456789"
         }
@@ -172,7 +174,7 @@ class TestAutoOrderService:
         """测试价格不匹配"""
         service = AutoOrderService()
         item_data = {
-            "商品 ID": "123456789",
+            "商品ID": "123456789",
             "当前售价": "6000",
             "商品链接": "https://example.com/item/123456789"
         }
@@ -186,6 +188,30 @@ class TestAutoOrderService:
         result = asyncio.run(service.process_auto_order(item_data, task_config))
         
         assert result["should_notify"] is False
+
+    def test_process_auto_order_uses_seller_id_argument(self):
+        """测试通过 seller_id 参数生成带卖家信息的链接"""
+        import asyncio
+
+        service = AutoOrderService()
+        item_data = {
+            "商品ID": "123456789",
+            "当前售价": "4500",
+            "商品链接": "https://example.com/item/123456789"
+        }
+        task_config = {
+            "auto_order_enabled": True,
+            "auto_order_action": "generate_link",
+            "auto_order_target_price": "5000"
+        }
+        
+        result = asyncio.run(
+            service.process_auto_order(item_data, task_config, seller_id="seller_001")
+        )
+        
+        assert result["action_taken"] == "link_generated"
+        assert "sellerId=seller_001" in result["order_link"]
+        assert "sellerId=seller_001" in result["mobile_order_link"]
 
 
 if __name__ == "__main__":

@@ -43,7 +43,11 @@ SCHEMA_STATEMENTS = (
         region TEXT,
         decision_mode TEXT NOT NULL,
         keyword_rules_json TEXT NOT NULL,
-        is_running INTEGER NOT NULL
+        is_running INTEGER NOT NULL,
+        auto_order_enabled INTEGER NOT NULL DEFAULT 0,
+        auto_order_target_price TEXT,
+        auto_order_action TEXT NOT NULL DEFAULT 'notify_only',
+        seller_active_option TEXT NOT NULL DEFAULT '__none__'
     )
     """,
     """
@@ -143,7 +147,37 @@ def init_schema(conn: sqlite3.Connection) -> None:
     for statement in SCHEMA_STATEMENTS:
         conn.execute(statement)
     _migrate_result_items_status(conn)
+    _migrate_tasks_auto_order(conn)
     conn.commit()
+
+
+def _migrate_tasks_auto_order(conn: sqlite3.Connection) -> None:
+    """为 tasks 表添加自动下单与卖家活跃筛选列（仅执行一次）。"""
+    row = conn.execute(
+        "SELECT value FROM app_metadata WHERE key = 'migration:tasks_auto_order'"
+    ).fetchone()
+    if row is not None:
+        return
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()]
+    if "auto_order_enabled" not in cols:
+        conn.execute(
+            "ALTER TABLE tasks ADD COLUMN auto_order_enabled INTEGER NOT NULL DEFAULT 0"
+        )
+    if "auto_order_target_price" not in cols:
+        conn.execute(
+            "ALTER TABLE tasks ADD COLUMN auto_order_target_price TEXT"
+        )
+    if "auto_order_action" not in cols:
+        conn.execute(
+            "ALTER TABLE tasks ADD COLUMN auto_order_action TEXT NOT NULL DEFAULT 'notify_only'"
+        )
+    if "seller_active_option" not in cols:
+        conn.execute(
+            "ALTER TABLE tasks ADD COLUMN seller_active_option TEXT NOT NULL DEFAULT '__none__'"
+        )
+    conn.execute(
+        "INSERT OR REPLACE INTO app_metadata(key, value) VALUES ('migration:tasks_auto_order', 'done')"
+    )
 
 
 def _migrate_result_items_status(conn: sqlite3.Connection) -> None:
