@@ -52,3 +52,11 @@ class PushPlusClient(NotificationClient):
             ),
         )
         response.raise_for_status()
+        try:
+            result = response.json()
+        except ValueError:
+            return
+        if result.get("code") != 200:
+            raise RuntimeError(
+                f"PushPlus 发送失败: {result.get('msg') or result.get('message') or result}"
+            )

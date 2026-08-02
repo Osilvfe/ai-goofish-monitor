@@ -1,6 +1,9 @@
 import asyncio
 
+import pytest
+
 from src.infrastructure.external.notification_clients.base import NotificationClient
+from src.infrastructure.external.notification_clients.pushplus_client import PushPlusClient
 from src.infrastructure.external.notification_clients.webhook_client import WebhookClient
 from src.services.notification_service import NotificationService
 
@@ -76,3 +79,42 @@ def test_webhook_client_renders_json_templates(monkeypatch):
     assert captured["json"]["message"].startswith("价格: 9999")
     assert captured["json"]["link"] == "https://www.goofish.com/item/123"
     assert captured["data"] is None
+
+
+class _FakePushPlusResponse:
+    def __init__(self, code=200, msg="success"):
+        self._code = code
+        self._msg = msg
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return {"code": self._code, "msg": self._msg}
+
+
+def test_pushplus_client_rejects_business_error(monkeypatch):
+    def _fake_post(url, json=None, timeout=None):
+        return _FakePushPlusResponse(code=300, msg="token invalid")
+
+    monkeypatch.setattr("requests.post", _fake_post)
+
+    client = PushPlusClient(token="invalid-token")
+    with pytest.raises(RuntimeError, match="token invalid"):
+        asyncio.run(client.send({"商品标题": "Sony A7M4"}, "价格合适"))
+
+
+def test_pushplus_client_accepts_success_response(monkeypatch):
+    captured = {}
+
+    def _fake_post(url, json=None, timeout=None):
+        captured["payload"] = json
+        return _FakePushPlusResponse(code=200, msg="success")
+
+    monkeypatch.setattr("requests.post", _fake_post)
+
+    client = PushPlusClient(token="valid-token", topic="group1")
+    asyncio.run(client.send({"商品标题": "Sony A7M4"}, "价格合适"))
+
+    assert captured["payload"]["token"] == "valid-token"
+    assert captured["payload"]["topic"] == "group1"
